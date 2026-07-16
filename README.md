@@ -25,3 +25,30 @@ It needs wifi once to set the clock (it says `NO CLOCK` until then). After that,
 positions need no network.
 
 ## Developing
+
+`app.py` and `hud.py` are the app, `emflib/` is the core.
+The tests need only Python 3, nothing else, just run `make test`
+
+The simulator needs SDL and a few Python packages (the app itself has no deps).
+
+Ubuntu:
+
+```bash
+sudo apt install -y git python3 python3-venv libsdl2-2.0-0   # tools + SDL for the sim window
+```
+
+NixOS:
+
+```bash
+nix-shell -p git python3 gnumake SDL2                        # a shell with the tools
+# the pip wheels below need nix-ld enabled, or an FHS shell, to load
+```
+
+Then on either:
+
+```bash
+python3 -m venv .venv && . .venv/bin/activate                 # isolated python env
+pip install pygame==2.6.1 wasmtime==39.0.0 requests==2.32.3   # what the simulator runs on
+git clone https://github.com/emfcamp/badge-2024-software ../badge-2024-software  # the simulator
+bash tools/sim.sh                                             # launch Overhead, F quits
+```
