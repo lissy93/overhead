@@ -1,0 +1,14 @@
+[app]
+name = "Overhead"
+category = "Apps"
+wifi_preference = true
+
+[entry]
+class = "OverheadApp"
+
+[metadata]
+author = "Alicia Sykes"
+license = "MIT"
+url = "https://github.com/lissy93/overhead"
+description = "Point your badge at the ISS, satellites, planets and planes overhead."
+version = "0.0.1"

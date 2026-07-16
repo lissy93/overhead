@@ -1,0 +1,6 @@
+tests/ export-ignore
+tools/ export-ignore
+metadata.json export-ignore
+Makefile export-ignore
+.gitignore export-ignore
+.gitattributes export-ignore
