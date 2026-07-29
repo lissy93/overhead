@@ -9,7 +9,7 @@ from app_components.notification import Notification
 from tildagonos import tildagonos
 
 from .emflib import config, iss, planes, targets, sun, sgp4, log
-from .emflib.net import safe_fetch
+from .emflib.net import safe_fetch, ensure_wifi
 from .emflib.util import guarded
 from . import hud
 
@@ -57,8 +57,9 @@ class OverheadApp(app.App):
         self._t_refresh = 0
         self._t_pln = 1e9
         self._t_pat = 0
+        self._t_ntp = 15000
         self.note = None
-        self._busy = {"tle": False, "pln": False, "pass": False}
+        self._busy = {"tle": False, "pln": False, "pass": False, "ntp": False}
         self._result = {"tle": None, "pln": None, "pass": None}
         self._load_cached_tles()
         eventbus.emit(PatternDisable())
@@ -139,6 +140,11 @@ class OverheadApp(app.App):
         self._drive_leds()
 
     def _tick(self, delta):
+        # the badge RTC boots at 2000 and the OS never syncs it, so we do
+        self._t_ntp += delta
+        if self._t_ntp >= 15000 and not self._clock_ok() and not self._busy["ntp"]:
+            self._t_ntp = 0
+            self._spawn("ntp")
         self._t_pos += delta
         if self._t_pos >= 1000:
             self._t_pos = 0
@@ -247,6 +253,11 @@ class OverheadApp(app.App):
                 p = tg.next_pass(config.LOCATION, tm)
                 tr = iss.pass_track(tg.sat, config.LOCATION, tm, p["in_s"], p["out_s"]) if p else []
                 self._result["pass"] = (idx, p, tr, ep)
+            elif key == "ntp":
+                ensure_wifi()
+                import ntptime
+                ntptime.settime()
+                log.info("overhead", "clock set %04d-%02d-%02d" % time.gmtime()[:3])
         except Exception as e:
             log.error("overhead.worker", key + " " + repr(e))
         self._busy[key] = False
